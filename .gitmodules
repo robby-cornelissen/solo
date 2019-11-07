@@ -13,3 +13,6 @@
 [submodule "crypto/cifra"]
 	path = crypto/cifra
 	url = https://github.com/solokeys/cifra.git
+[submodule "crypto/mbedtls"]
+	path = crypto/mbedtls
+	url = https://github.com/ARMmbed/mbedtls
