@@ -1,9 +1,3 @@
-**NEW!** We launched a new tiny security key called Somu, it's live on Crowd Supply and you can [pre-order it now](https://solokeys.com/somu)!
-
-[<img src="https://miro.medium.com/max/1400/1*PnzCPLqq_5nt1gjgSEY2LQ.png" width="600">](https://solokeys.com/somu)
-
-Somu is the micro version of Solo. We were inspired to make a secure Tomu, so we took its tiny form factor, we added the secure microcontroller and firmware of Solo, et voilà! Here we have Somu.
-
 [![latest release](https://img.shields.io/github/release/solokeys/solo.svg)](https://update.solokeys.com/)
 [![Keybase Chat](https://img.shields.io/badge/chat-on%20keybase-brightgreen.svg)](https://keybase.io/team/solokeys.public)
 [![Build Status](https://travis-ci.com/solokeys/solo.svg?style=flat-square&branch=master)](https://travis-ci.com/solokeys/solo)
@@ -38,10 +32,58 @@ Check out [solokeys.com](https://solokeys.com), for options on where to buy Solo
 
 If you have a Solo for Hacker, here's how you can load your own code on it. You can find more details, including how to permanently lock it, in our [documentation](https://docs.solokeys.io/solo/building/). We support Python3.
 
+For example, if you want to turn off any blue light emission, you can edit [`led_rgb()`](https://github.com/solokeys/solo/blob/master/targets/stm32l432/src/app.h#L48) and change `LED_INIT_VALUE`
+to be a different hex color.
+
+Then recompile, load your new firmware, and enjoy a different LED color Solo.
+
+In the Hacker version, hardware is the same but the firmware is unlocked, so you can 1) load an unsigned application, or 2) entirely reflash the key. By contrast, in a regular Solo you can only upgrade to a firmware signed by SoloKeys, and flash is locked and debug disabled permanently.
+
+Hacker Solo isn't really secure so you should only use it for development. An attacker with physical access to a Solo for Hacker can reflash it following the steps above, and even a malware on your computer could possibly reflash it.
+
+## Checking out the code
 ```bash
 git clone --recurse-submodules https://github.com/solokeys/solo
 cd solo
+```
 
+If you forgot the `--recurse-submodules` while cloning, simply run `git submodule update --init --recursive`.
+
+`make update` will also checkout the latest code on `master` and submodules.
+
+## Checking out the code to build a specific version
+
+You can checkout the code to build a specific version of the firmware with:
+```
+VERSION_TO_BUILD=2.5.3
+git fetch --tags
+git checkout ${VERSION_TO_BUILD}
+git submodule update --init --recursive
+```
+
+## Installing the toolchain
+
+In order to compile ARM code, you need the ARM compiler and other things like bundling bootloader and firmware require the `solo-python` python package. Check our [documentation](https://docs.solokeys.io/solo/) for details
+
+## Installing the toolkit and compiling in Docker 
+Alternatively, you can use Docker to create a container with the toolchain.
+You can run:
+
+```bash
+# Build the toolchain container
+make docker-build-toolchain 
+
+# Build all versions of the firmware in the "builds" folder
+make docker-build-all
+```
+
+The `builds` folder will contain all the variation on the firmware in `.hex` files.
+
+## Build locally
+
+If you have the toolchain installed on your machine you can build the firmware with: 
+
+```bash
 cd targets/stm32l432
 make cbor
 make build-hacker
@@ -52,19 +94,6 @@ source venv/bin/activate
 solo program aux enter-bootloader
 solo program bootloader targets/stm32l432/solo.hex
 ```
-
-Alternatively, run `make docker-build` and use the firmware generated in `/tmp`.
-
-If you forgot the `--recurse-submodules` when cloning, simply `git submodule update --init --recursive`.
-
-For example, if you want to turn off any blue light emission, you can edit [`led_rgb()`](https://github.com/solokeys/solo/blob/master/targets/stm32l432/src/app.h#L48) and change `LED_INIT_VALUE`
-to be a different hex color.
-
-Then recompile, load your new firmware, and enjoy a different LED color Solo.
-
-In the Hacker version, hardware is the same but the firmware is unlocked, so you can 1) load an unsigned application, or 2) entirely reflash the key. By contrast, in a regular Solo you can only upgrade to a firmware signed by SoloKeys, and flash is locked and debug disabled permanently.
-
-Hacker Solo isn't really secure so you should only use it for development. An attacker with physical access to a Solo for Hacker can reflash it following the steps above, and even a malware on your computer could possibly reflash it.
 
 # Developing Solo (No Hardware Needed)
 
@@ -137,6 +166,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="http://www.schulz.dk"><img src="https://avatars1.githubusercontent.com/u/1150049?v=4" width="100px;" alt="Kim Schulz"/><br /><sub><b>Kim Schulz</b></sub></a><br /><a href="#business-kimusan" title="Business development">💼</a> <a href="#ideas-kimusan" title="Ideas, Planning, & Feedback">🤔</a></td>
     <td align="center"><a href="https://github.com/oplik0"><img src="https://avatars2.githubusercontent.com/u/25460763?v=4" width="100px;" alt="Jakub"/><br /><sub><b>Jakub</b></sub></a><br /><a href="https://github.com/solokeys/solo/issues?q=author%3Aoplik0" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/jolo1581"><img src="https://avatars1.githubusercontent.com/u/53423977?v=4" width="100px;" alt="Jan A."/><br /><sub><b>Jan A.</b></sub></a><br /><a href="https://github.com/solokeys/solo/commits?author=jolo1581" title="Code">💻</a> <a href="https://github.com/solokeys/solo/commits?author=jolo1581" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/ccinelli"><img src="https://avatars0.githubusercontent.com/u/38021940?v=4" width="100px;" alt="ccinelli"/><br /><sub><b>ccinelli</b></sub></a><br /><a href="#infra-ccinelli" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="https://github.com/solokeys/solo/commits?author=ccinelli" title="Tests">⚠️</a></td>
   </tr>
 </table>
 
@@ -170,7 +200,7 @@ You can buy Solo, Solo Tap, and Solo for Hackers at [solokeys.com](https://solok
 <br/>
 
 [![License](https://img.shields.io/github/license/solokeys/solo.svg)](https://github.com/solokeys/solo/blob/master/LICENSE)
-[![All Contributors](https://img.shields.io/badge/all_contributors-20-orange.svg?style=flat-square)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-21-orange.svg?style=flat-square)](#contributors)
 [![Build Status](https://travis-ci.com/solokeys/solo.svg?branch=master)](https://travis-ci.com/solokeys/solo)
 [![Discourse Users](https://img.shields.io/discourse/https/discourse.solokeys.com/users.svg)](https://discourse.solokeys.com)
 [![Keybase Chat](https://img.shields.io/badge/chat-on%20keybase-brightgreen.svg)](https://keybase.io/team/solokeys.public)

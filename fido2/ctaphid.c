@@ -696,7 +696,7 @@ uint8_t ctaphid_custom_command(int len, CTAP_RESPONSE * ctap_resp, CTAPHID_WRITE
 {
     ctap_response_init(ctap_resp);
 
-#if !defined(IS_BOOTLOADER) && (defined(SOLO_HACKER) || defined(SOLO_EXPERIMENTAL))
+#if !defined(IS_BOOTLOADER) && (defined(SOLO_EXPERIMENTAL))
     uint32_t param;
 #endif
 #if defined(IS_BOOTLOADER)
@@ -710,22 +710,19 @@ uint8_t ctaphid_custom_command(int len, CTAP_RESPONSE * ctap_resp, CTAPHID_WRITE
             printf1(TAG_HID,"CTAPHID_BOOT\n");
             u2f_set_writeback_buffer(ctap_resp);
             is_busy = bootloader_bridge(len, ctap_buffer);
+            wb->bcnt = 1 + ctap_resp->length;
 
             ctaphid_write(wb, &is_busy, 1);
             ctaphid_write(wb, ctap_resp->data, ctap_resp->length);
             ctaphid_write(wb, NULL, 0);
             return 1;
 #endif
-#if defined(SOLO_HACKER)
+#if defined(SOLO)
         case CTAPHID_ENTERBOOT:
             printf1(TAG_HID,"CTAPHID_ENTERBOOT\n");
             boot_solo_bootloader();
             wb->bcnt = 0;
             ctaphid_write(wb, NULL, 0);
-            return 1;
-        case CTAPHID_ENTERSTBOOT:
-            printf1(TAG_HID,"CTAPHID_ENTERBOOT\n");
-            boot_st_bootloader();
             return 1;
 #endif
 
@@ -745,16 +742,21 @@ uint8_t ctaphid_custom_command(int len, CTAP_RESPONSE * ctap_resp, CTAPHID_WRITE
 
         case CTAPHID_GETVERSION:
             printf1(TAG_HID,"CTAPHID_GETVERSION\n");
-            wb->bcnt = 3;
+            wb->bcnt = 4;
             ctap_buffer[0] = SOLO_VERSION_MAJ;
             ctap_buffer[1] = SOLO_VERSION_MIN;
             ctap_buffer[2] = SOLO_VERSION_PATCH;
-            ctaphid_write(wb, ctap_buffer, 3);
+#if defined(SOLO)
+            ctap_buffer[3] = solo_is_locked();
+#else
+            ctap_buffer[3] = 0;
+#endif
+            ctaphid_write(wb, ctap_buffer, 4);
             ctaphid_write(wb, NULL, 0);
             return 1;
         break;
 
-#if !defined(IS_BOOTLOADER) && (defined(SOLO_HACKER) || defined(SOLO_EXPERIMENTAL))
+#if !defined(IS_BOOTLOADER) && (defined(SOLO_EXPERIMENTAL))
         case CTAPHID_LOADKEY:
             /**
              * Load external key.  Useful for enabling backups.

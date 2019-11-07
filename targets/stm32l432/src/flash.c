@@ -31,21 +31,18 @@ static void flash_unlock(void)
 // Locks flash and turns off DFU
 void flash_option_bytes_init(int boot_from_dfu)
 {
-#ifndef FLASH_ROP
-#define FLASH_ROP 0
-#endif
-#if FLASH_ROP == 0
     uint32_t val = 0xfffff8aa;
-#elif FLASH_ROP == 2
-    uint32_t val = 0xfffff8cc;
-#else
-    uint32_t val = 0xfffff8b9;
-#endif
 
-    if (boot_from_dfu)
-    {
+    if (boot_from_dfu){
         val &= ~(1<<27); // nBOOT0 = 0  (boot from system rom)
     }
+    else {
+        if (solo_is_locked())
+        {
+            val = 0xfffff8cc;
+        }
+    }
+
     val &= ~(1<<26); // nSWBOOT0 = 0  (boot from nBoot0)
     val &= ~(1<<25); // SRAM2_RST = 1 (erase sram on reset)
     val &= ~(1<<24); // SRAM2_PE = 1 (parity check en)
